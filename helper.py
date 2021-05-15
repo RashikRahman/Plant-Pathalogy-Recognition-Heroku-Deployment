@@ -8,9 +8,11 @@ from skimage import transform
 import cv2
 import numpy as np
 
-def load_model():
-    model = tf.keras.models.load_model('./Logs/Logs/model3.hdf5')
-    return model
+def load_tflite_model():
+    # Load the TFLite model and allocate tensors.
+    interpreter = tf.lite.Interpreter(model_path="./model.tflite")
+    interpreter.allocate_tensors()
+    return interpreter
 
 def convert(np_image,shape):
     np_image = np.array(np_image).astype('float32')/255.0
@@ -18,9 +20,18 @@ def convert(np_image,shape):
     np_image = np.expand_dims(np_image, axis=0)
     return np_image
 
-def main(image,model):
+def main(image,interpreter):
+    # Get input and output tensors.
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
     input_size = 80
     img = convert(image,input_size)
+
     target_names=['Healthy','Powdery','Rust']
-    return target_names[np.argmax(model.predict(img), axis=1)[0]]
+    
+    interpreter.set_tensor(input_details[0]['index'], img)
+    interpreter.invoke()
+
+    return target_names[np.argmax(interpreter.get_tensor(output_details[0]['index']), axis=1)[0]]
 

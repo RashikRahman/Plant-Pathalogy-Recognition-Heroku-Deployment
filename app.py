@@ -8,8 +8,6 @@ import time
 from PIL import Image
 import helper
 import argparse
-
-
 import numpy as np
 
 app = Flask(__name__)
@@ -21,7 +19,6 @@ def predict():
 
     img = file_upload("Select a image:", accept="images/*")
 
-   
 
     put_processbar('bar')
     for i in range(1, 11):
@@ -50,7 +47,7 @@ app.add_url_rule('/tool', 'webio_view', webio_view(predict),
 
 if __name__ == '__main__':
     global model 
-    model = helper.load_model()
+    model = helper.load_tflite_model()
     parser = argparse.ArgumentParser()
     parser.add_argument("-p","--port",type=int,default=8080)
     args = parser.parse_args()
